@@ -1,0 +1,47 @@
+{
+  "name": "promptsack",
+  "version": "1.0.0",
+  "description": "PromptSack — encrypted prompt catalog with MongrelDB (Rust) + MiniLM search via Tauri",
+  "license": "GPL-3.0-only",
+  "private": false,
+  "type": "module",
+  "packageManager": "npm@12.0.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/visorcraft/promptsack.git"
+  },
+  "homepage": "https://github.com/visorcraft/promptsack#readme",
+  "bugs": {
+    "url": "https://github.com/visorcraft/promptsack/issues"
+  },
+  "scripts": {
+    "ui:build": "tsc -p tsconfig.json && node scripts/copy-renderer.mjs && node scripts/bundle-ui.mjs",
+    "ui:dev": "npm run ui:build && npx --yes serve ui -l 1420 --no-clipboard",
+    "build": "npm run ui:build && cargo build --manifest-path src-tauri/Cargo.toml",
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "start": "tauri dev",
+    "dist": "tauri build",
+    "dist:linux": "tauri build --target x86_64-unknown-linux-gnu",
+    "dist:mac": "tauri build --target universal-apple-darwin",
+    "dist:win": "tauri build --target x86_64-pc-windows-msvc",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run && cargo test --manifest-path src-tauri/Cargo.toml",
+    "test:js": "vitest run",
+    "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml"
+  },
+  "devDependencies": {
+    "@tauri-apps/api": "2.11.1",
+    "@tauri-apps/cli": "2.11.4",
+    "@types/node": "26.1.1",
+    "esbuild": "0.25.5",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "allowScripts": {
+    "esbuild@0.25.5": true
+  }
+}

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PromptSack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Gate: open / create encrypted vault -->
+      <section id="gate" class="gate" hidden>
+        <div class="gate-card">
+          <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 48 48" width="48" height="48">
+                <defs>
+                  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#a78bfa" />
+                    <stop offset="50%" stop-color="#22d3ee" />
+                    <stop offset="100%" stop-color="#f472b6" />
+                  </linearGradient>
+                </defs>
+                <rect x="6" y="10" width="36" height="30" rx="8" fill="url(#g)" opacity="0.2" />
+                <path
+                  d="M12 18h24v4H12zm0 8h16v4H12zm0 8h20v4H12z"
+                  fill="url(#g)"
+                />
+                <circle cx="36" cy="14" r="6" fill="#22d3ee" />
+              </svg>
+            </div>
+            <h1>PromptSack</h1>
+            <p class="tagline">Encrypted prompt catalog · MiniLM semantic search</p>
+          </div>
+          <form id="gate-form" class="gate-form">
+            <label class="field">
+              <span>Vault passphrase</span>
+              <input
+                id="gate-pass"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter passphrase to unlock or create"
+                required
+                minlength="4"
+              />
+            </label>
+            <p id="gate-hint" class="hint">
+              Your vault is encrypted at rest with MongrelDB AES-256-GCM.
+            </p>
+            <p id="gate-error" class="error" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" id="gate-submit">
+              Open vault
+            </button>
+          </form>
+        </div>
+        <div class="gate-bg" aria-hidden="true"></div>
+      </section>
+
+      <!-- Main three-pane shell -->
+      <section id="shell" class="shell" hidden>
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-head">
+            <div class="logo-row">
+              <span class="logo-dot"></span>
+              <span class="logo-text">PromptSack</span>
+            </div>
+            <div class="search-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+                <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              <input
+                id="search-input"
+                type="search"
+                placeholder="Semantic search…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <kbd class="search-kbd">/</kbd>
+            </div>
+          </div>
+
+          <nav class="nav-block">
+            <div class="nav-label">
+              <span>Prompts</span>
+              <button class="icon-btn" id="btn-new-prompt" title="New prompt" type="button">+</button>
+            </div>
+            <button class="nav-item active" data-filter='{"kind":"all"}' type="button">
+              <span>All Prompts</span>
+              <span class="count" id="count-all">0</span>
+            </button>
+            <button class="nav-item" data-filter='{"kind":"favorites"}' type="button">
+              <span>Favorites</span>
+              <span class="count" id="count-fav">0</span>
+            </button>
+            <button class="nav-item" data-filter='{"kind":"locked"}' type="button">
+              <span>Locked</span>
+              <span class="count" id="count-locked">0</span>
+            </button>
+          </nav>
+
+          <nav class="nav-block">
+            <div class="nav-label">
+              <span>Folders</span>
+              <button class="icon-btn" id="btn-new-folder" title="New folder" type="button">+</button>
+            </div>
+            <div id="folder-list" class="nav-list"></div>
+          </nav>
+
+          <nav class="nav-block">
+            <div class="nav-label">
+              <span>Smart folders</span>
+              <button class="icon-btn" id="btn-new-smart" title="Save current filter as smart folder" type="button">+</button>
+            </div>
+            <div id="smart-folder-list" class="nav-list"></div>
+          </nav>
+
+          <nav class="nav-block grow">
+            <div class="nav-label">
+              <span>Tags</span>
+              <button class="icon-btn" id="btn-manage-tags" title="Manage tags" type="button">⚙</button>
+            </div>
+            <div id="tag-list" class="tag-cloud"></div>
+          </nav>
+
+          <div class="sidebar-foot">
+            <button class="btn btn-ghost btn-block" id="btn-settings" type="button">
+              Settings
+            </button>
+          </div>
+        </aside>
+
+        <section class="list-pane" id="list-pane">
+          <header class="list-toolbar" id="list-toolbar-normal">
+            <div class="toolbar-left">
+              <button class="btn btn-ghost btn-sm" id="btn-select-mode" type="button">Select</button>
+            </div>
+            <div class="toolbar-right">
+              <select id="sort-select" class="select select-compact" aria-label="Sort">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="title-asc">Title A–Z</option>
+                <option value="title-desc">Title Z–A</option>
+              </select>
+            </div>
+          </header>
+          <header class="list-toolbar selection-toolbar" id="list-toolbar-select" hidden>
+            <div class="selection-left">
+              <button class="btn btn-sm" id="btn-select-done" type="button">Done</button>
+              <div class="selection-count-pill" aria-live="polite">
+                <span id="bulk-count">0</span>
+                <span class="selection-count-label">selected</span>
+              </div>
+            </div>
+            <div class="selection-actions" role="group" aria-label="Bulk actions">
+              <button class="btn btn-sm" id="btn-bulk-move" type="button" disabled title="Move to folder">
+                Move
+              </button>
+              <button class="btn btn-sm" id="btn-bulk-export" type="button" disabled title="Export selected">
+                Export
+              </button>
+              <button class="btn btn-danger btn-sm" id="btn-bulk-delete" type="button" disabled title="Delete selected">
+                Delete
+              </button>
+            </div>
+          </header>
+          <div id="prompt-list" class="prompt-list" role="list"></div>
+          <button id="btn-back-top" class="fab-top" type="button" hidden title="Back to top">↑</button>
+        </section>
+
+        <section class="editor-pane" id="editor-pane">
+          <div id="editor-empty" class="editor-empty">
+            <div class="empty-glow"></div>
+            <h2>Select or create a prompt</h2>
+            <p>Search is semantic — try paraphrases, not just keywords.</p>
+            <button class="btn btn-primary" id="btn-empty-new" type="button">New prompt</button>
+          </div>
+
+          <form id="editor-form" class="editor-form" hidden>
+            <div class="editor-top">
+              <label class="field grow">
+                <span>Title</span>
+                <input id="ed-title" type="text" placeholder="Prompt title" maxlength="200" />
+              </label>
+              <label class="toggle" title="Lock prompt">
+                <span>Lock</span>
+                <input id="ed-lock" type="checkbox" />
+                <span class="toggle-ui"></span>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Folder</span>
+              <select id="ed-folder" class="select"></select>
+            </label>
+
+            <label class="field body-field">
+              <span class="field-row">
+                <span>Prompt</span>
+                <button type="button" class="icon-btn" id="btn-fullscreen-body" title="Fullscreen">⛶</button>
+              </span>
+              <textarea id="ed-body" rows="12" placeholder="Write your prompt…" spellcheck="true"></textarea>
+              <span class="char-count" id="char-count">0 characters</span>
+            </label>
+
+            <label class="field">
+              <span class="field-row">
+                <span>Notes</span>
+                <button type="button" class="icon-btn" id="btn-fullscreen-notes" title="Fullscreen">⛶</button>
+              </span>
+              <textarea id="ed-notes" rows="3" placeholder="Private notes…"></textarea>
+            </label>
+
+            <label class="field">
+              <span>Tags</span>
+              <div class="tag-input-wrap">
+                <div id="ed-tags" class="tag-chips"></div>
+                <input id="ed-tag-input" type="text" placeholder="Add tags…" />
+              </div>
+            </label>
+
+            <div class="editor-actions">
+              <button type="button" class="btn btn-ghost" id="btn-favorite" title="Mark as favorite" aria-pressed="false" aria-label="Favorite">☆</button>
+              <button type="submit" class="btn btn-primary grow">Save</button>
+              <button type="button" class="btn btn-danger" id="btn-delete">Delete</button>
+            </div>
+
+            <div id="editor-locked-banner" class="locked-banner" hidden>
+              This prompt is locked.
+              <button type="button" class="btn btn-sm btn-primary" id="btn-unlock-prompt">Unlock session</button>
+            </div>
+          </form>
+        </section>
+      </section>
+
+      <!-- Modals -->
+      <div id="modal-root" class="modal-root" hidden>
+        <div class="modal-backdrop" data-close="1"></div>
+        <div class="modal" role="dialog" aria-modal="true">
+          <header class="modal-head">
+            <h3 id="modal-title">Dialog</h3>
+            <button class="icon-btn" type="button" data-close="1">✕</button>
+          </header>
+          <div id="modal-body" class="modal-body"></div>
+          <footer id="modal-foot" class="modal-foot"></footer>
+        </div>
+      </div>
+
+      <div id="toast" class="toast" hidden></div>
+    </div>
+    <script src="bridge.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

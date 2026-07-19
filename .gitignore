@@ -1,0 +1,62 @@
+# Dependencies & package managers
+node_modules/
+.npm/
+.pnpm-store/
+
+# Build outputs
+dist/
+ui/app.js
+release/
+src-tauri/target/
+*.tsbuildinfo
+
+# Embeddings / model caches
+.cache/
+models/
+.fastembed_cache/
+src-tauri/.fastembed_cache/
+**/models--*/
+
+# Runtime / local vault data
+data/
+*.db/
+*.mdb/
+.promptsack/
+scratch/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Editor / IDE / OS
+.idea/
+.vscode/
+*.local
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Logs & coverage
+*.log
+coverage/
+.nyc_output/
+.vite/
+.turbo/
+
+# Agent / AI tooling local notes (not part of the product)
+AGENTS.md
+CLAUDE.md
+.claude/
+.grok/
+.cursor/
+.codex/
+.opencode/
+_review_diff.txt
+
+# Misc local
+*.orig
+*.bak
+.direnv/
+.venv/
