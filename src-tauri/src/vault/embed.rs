@@ -58,6 +58,24 @@ pub struct Embedder {
     local: StdMutex<Option<TextEmbedding>>,
 }
 
+fn load_minilm() -> Result<TextEmbedding, String> {
+    let mut last = String::from("unknown error");
+    for attempt in 0..3 {
+        match TextEmbedding::try_new(
+            InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(false),
+        ) {
+            Ok(model) => return Ok(model),
+            Err(e) => {
+                last = e.to_string();
+                if attempt + 1 < 3 {
+                    std::thread::sleep(std::time::Duration::from_millis(400 * (attempt as u64 + 1)));
+                }
+            }
+        }
+    }
+    Err(format!("failed to load MiniLM: {last}"))
+}
+
 impl Embedder {
     pub fn new(config: EmbeddingConfig, api_key: Option<String>) -> Self {
         Self {
@@ -75,12 +93,25 @@ impl Embedder {
     }
 
     fn ensure_local(&self) -> Result<(), String> {
+        {
+            let slot = self.local.lock().map_err(|e| e.to_string())?;
+            if slot.is_some() {
+                return Ok(());
+            }
+        }
+        // Parallel vaults (and the test suite) otherwise download MiniLM at once
+        // and one of them fails with "Failed to retrieve model.onnx".
+        static INIT: StdMutex<()> = StdMutex::new(());
+        let _guard = INIT.lock().map_err(|e| e.to_string())?;
+        {
+            let slot = self.local.lock().map_err(|e| e.to_string())?;
+            if slot.is_some() {
+                return Ok(());
+            }
+        }
+        let model = load_minilm()?;
         let mut slot = self.local.lock().map_err(|e| e.to_string())?;
         if slot.is_none() {
-            let model = TextEmbedding::try_new(
-                InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(false),
-            )
-            .map_err(|e| format!("failed to load MiniLM: {e}"))?;
             *slot = Some(model);
         }
         Ok(())
