@@ -2,6 +2,16 @@
 
 use mongreldb_kit::{Column, ColumnType, Index, IndexKind, Schema, Table};
 
+fn index(name: &str, column: &str, kind: IndexKind) -> Index {
+    Index {
+        name: name.into(),
+        columns: vec![column.into()],
+        unique: false,
+        kind,
+        ..Index::default()
+    }
+}
+
 pub fn vault_schema() -> Schema {
     let folders = Table {
         id: 1,
@@ -14,12 +24,7 @@ pub fn vault_schema() -> Schema {
             Column::new(5, "updated_at", ColumnType::Text),
         ],
         primary_key: vec!["id".into()],
-        indexes: vec![Index {
-            name: "idx_folders_name".into(),
-            columns: vec!["name".into()],
-            unique: false,
-            kind: IndexKind::Bitmap,
-        }],
+        indexes: vec![index("idx_folders_name", "name", IndexKind::Bitmap)],
         foreign_keys: vec![],
         unique_constraints: vec![],
         check_constraints: vec![],
@@ -69,36 +74,11 @@ pub fn vault_schema() -> Schema {
         ],
         primary_key: vec!["id".into()],
         indexes: vec![
-            Index {
-                name: "idx_pi_title".into(),
-                columns: vec!["title".into()],
-                unique: false,
-                kind: IndexKind::Fm,
-            },
-            Index {
-                name: "idx_pi_body".into(),
-                columns: vec!["body_fts".into()],
-                unique: false,
-                kind: IndexKind::Fm,
-            },
-            Index {
-                name: "idx_pi_notes".into(),
-                columns: vec!["notes_fts".into()],
-                unique: false,
-                kind: IndexKind::Fm,
-            },
-            Index {
-                name: "idx_pi_tags".into(),
-                columns: vec!["tags_json".into()],
-                unique: false,
-                kind: IndexKind::Fm,
-            },
-            Index {
-                name: "idx_pi_embedding".into(),
-                columns: vec!["embedding".into()],
-                unique: false,
-                kind: IndexKind::Ann,
-            },
+            index("idx_pi_title", "title", IndexKind::Fm),
+            index("idx_pi_body", "body_fts", IndexKind::Fm),
+            index("idx_pi_notes", "notes_fts", IndexKind::Fm),
+            index("idx_pi_tags", "tags_json", IndexKind::Fm),
+            index("idx_pi_embedding", "embedding", IndexKind::Ann),
         ],
         foreign_keys: vec![],
         unique_constraints: vec![],

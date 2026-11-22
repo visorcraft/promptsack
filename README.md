@@ -1,13 +1,13 @@
 # PromptSack
 
-**v1.0.0** — Encrypted local prompt catalog with hybrid semantic search.
+**v1.1.0** — Encrypted local prompt catalog with hybrid semantic search.
 
 PromptSack is a desktop app for creating, organizing, locking, and **searching** prompts. Content lives as plain Markdown files. Search and catalog metadata live in an encrypted **MongrelDB** index. Embeddings are **all-MiniLM-L6-v2** (384-d) by default, with optional OpenAI-compatible remote embeddings.
 
 ![License: GPL-3.0-only](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)
 ![Node 24](https://img.shields.io/badge/node-24-brightgreen)
-![Rust](https://img.shields.io/badge/rust-1.88%2B-orange)
+![Rust](https://img.shields.io/badge/rust-1.95%2B-orange)
 ![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
 Inspired by [PromptCat](https://github.com/sevenreasons/promptcat); rebuilt around native Rust storage and semantic search.
@@ -87,7 +87,7 @@ $PROMPTSACK_DATA_DIR  or  <app data>/vault/
 ## Requirements
 
 - **Node.js 24+**
-- **Rust 1.88+** (stable)
+- **Rust 1.95+** (stable)
 - Linux: WebKitGTK 4.1 + related packages:
 
 ```bash
@@ -183,7 +183,7 @@ Configure under **Settings** in the app.
 ## Tech stack
 
 - **Tauri 2** · Rust · system webview
-- **mongreldb-kit** `0.60.3`
+- **mongreldb-kit** `0.66.2`
 - **fastembed** · **reqwest** · **keyring** · **aes-gcm** · **scrypt**
 - TypeScript 7 · esbuild · Vitest
 - GitHub Actions (test + multi-OS package)

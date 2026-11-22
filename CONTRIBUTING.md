@@ -3,7 +3,7 @@
 ## Setup
 
 ```bash
-# Node.js 24+ and Rust 1.88+
+# Node.js 24+ and Rust 1.95+
 npm install
 npm test
 npm start
