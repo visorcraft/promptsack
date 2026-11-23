@@ -21,10 +21,10 @@ describe('repo contract', () => {
     expect(pkg.license).toBe('GPL-3.0-only');
   });
 
-  it('package metadata brands PromptSack as Tauri app at 1.1.2', () => {
+  it('package metadata brands PromptSack as Tauri app at 1.2.0', () => {
     const pkg = JSON.parse(read('package.json'));
     expect(pkg.name).toBe('promptsack');
-    expect(pkg.version).toBe('1.1.2');
+    expect(pkg.version).toBe('1.2.0');
     expect(pkg.description.toLowerCase()).toContain('promptsack');
     expect(pkg.description.toLowerCase()).toMatch(/tauri|mongrel/);
     expect(pkg.engines.node).toMatch(/24/);
@@ -35,7 +35,7 @@ describe('repo contract', () => {
     const cargo = read('src-tauri/Cargo.toml');
     expect(cargo).toMatch(/version\s*=\s*"1\.1\.2"/);
     const tauri = JSON.parse(read('src-tauri/tauri.conf.json'));
-    expect(tauri.version).toBe('1.1.2');
+    expect(tauri.version).toBe('1.2.0');
   });
 
   it('GitHub Actions use Node 24, Rust, and build Windows, macOS, Linux', () => {

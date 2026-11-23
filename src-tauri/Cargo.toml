@@ -1,6 +1,6 @@
 [package]
 name = "promptsack"
-version = "1.1.2"
+version = "1.2.0"
 description = "PromptSack — encrypted prompt catalog with MongrelDB + MiniLM search"
 authors = ["Visorcraft"]
 license = "GPL-3.0-only"
@@ -32,7 +32,7 @@ keyring = "3.6"
 reqwest = { version = "0.12", features = ["blocking", "json"] }
 fastembed = "5"
 # Native MongrelDB kit (Rust) — path to sibling monorepo when present, else crates.io
-mongreldb-kit = { version = "0.66.2", features = [] }
+mongreldb-kit = { version = "0.67.0", features = [] }
 
 [dev-dependencies]
 tempfile = "3"
